@@ -1,3 +1,4 @@
+import logging
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import CommandStart, Command
 from aiogram.fsm.state import State, StatesGroup
@@ -19,7 +20,7 @@ conversation_history = {}
 @router.message(F.text == 'На главную')
 async def cmd_start(message: Message, bot: Bot):
     me = await bot.get_me()
-    await message.reply(f"Привет!\nЯ - {me.first_name}", reply_markup=kb.main)
+    await message.reply(f"Привет!\nЯ - ChatGPT", reply_markup=kb.main)
     
 
 def trim_history(history, max_length=4096):
@@ -33,7 +34,8 @@ def trim_history(history, max_length=4096):
 @router.message(Command('clear'))
 async def process_clear_command(message: Message):
     user_id = message.from_user.id
-    conversation_history[user_id] = []
+    conversation_history[user_id] = []    
+    logging.info('История диалога очищена.')
     await message.reply("История диалога очищена.")
 
 async def chat(user_id, user_input):
@@ -54,11 +56,12 @@ async def chat(user_id, user_input):
             #provider=g4f.Provider.GeminiProChat, #работает, но кривой, чуть менее кривой (ограничение по символам)
             #provider=g4f.Provider.PerplexityLabs, #пока лучше других
             #provider=g4f.Provider.You, #работал, но сейчас не хочет
-            provider=g4f.Provider.You, 
+            provider=g4f.Provider.PerplexityLabs, 
             api_key=os.getenv('openai_token_new')
         )
         chat_gpt_response = response
-    except Exception as e:
+    except Exception as e:        
+        logging.info(f"ERROR RESPONSE ### {str(e)}")
         chat_gpt_response = "Извините, произошла ошибка. " + str(e)
 
     conversation_history[user_id].append({"role": "assistant", "content": chat_gpt_response})
@@ -67,9 +70,8 @@ async def chat(user_id, user_input):
 
 @router.message()
 async def any_reply(message: Message, bot: Bot):
-    
-    
     user_id = message.from_user.id
     user_input = message.text
+    logging.info(f"Response from {user_id} : {user_input}")
     await message.answer(await chat(user_id, user_input))
     
