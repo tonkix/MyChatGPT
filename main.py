@@ -11,7 +11,7 @@ load_dotenv()
 file_handler = logging.FileHandler('my_logs.log')
 file_handler.setLevel(logging.DEBUG)
 logging.basicConfig(level=logging.INFO, 
-                    #handlers=[file_handler],
+                    handlers=[file_handler],
                     format='%(levelname)-8s ## %(filename)s:%(lineno)d #####'
         '[%(asctime)s] - %(name)s - %(message)s')
 
