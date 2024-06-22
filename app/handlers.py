@@ -16,6 +16,12 @@ load_dotenv()
 router = Router()
 conversation_history = {}
 
+async def start_context_data(user_id):
+    conversation_history[user_id].append({"role": "user", "content": "пиши на русском языке"})
+    conversation_history[user_id].append({"role": "user", "content": "пиши только по русски"})
+    conversation_history[user_id].append({"role": "user", "content": "не отвечай на английском"})
+    
+
 @router.message(CommandStart())
 @router.message(F.text == 'На главную')
 async def cmd_start(message: Message, bot: Bot):
@@ -34,13 +40,15 @@ def trim_history(history, max_length=4096):
 @router.message(Command('clear'))
 async def process_clear_command(message: Message):
     user_id = message.from_user.id
-    conversation_history[user_id] = []    
-    logging.info('История диалога очищена.')
+    conversation_history[user_id] = []        
+    start_context_data(user_id)
+    logging.info(f"{user_id} - История диалога очищена.")
     await message.reply("История диалога очищена.")
 
 async def chat(user_id, user_input):
     if user_id not in conversation_history:
         conversation_history[user_id] = []
+        start_context_data(user_id)
 
     conversation_history[user_id].append({"role": "user", "content": user_input})
     conversation_history[user_id] = trim_history(conversation_history[user_id])
@@ -60,11 +68,11 @@ async def chat(user_id, user_input):
             api_key=os.getenv('openai_token_new')
         )
         chat_gpt_response = response
+        conversation_history[user_id].append({"role": "assistant", "content": chat_gpt_response})
     except Exception as e:        
         logging.info(f"ERROR RESPONSE ### {str(e)}")
         chat_gpt_response = "Извините, произошла ошибка. " + str(e)
 
-    conversation_history[user_id].append({"role": "assistant", "content": chat_gpt_response})
     return chat_gpt_response
 
 
