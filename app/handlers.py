@@ -24,7 +24,7 @@ async def start_context_data(user_id):
 
 @router.message(CommandStart())
 @router.message(F.text == 'На главную')
-async def cmd_start(message: Message, bot: Bot):
+async def cmd_start(message: Message):
     await message.reply(f"Привет!\nЯ - ChatGPT", reply_markup=kb.main)
 
 
@@ -58,7 +58,6 @@ async def chat(user_id, user_input):
     try:
         response = await g4f.ChatCompletion.create_async(
             model=g4f.models.default,
-            # model='gpt-4-0314',
             messages=chat_history,
             # provider=g4f.Provider.Blackbox, # работает, но кривой
             # provider=g4f.Provider.GeminiProChat, # работает, но кривой, чуть менее кривой (ограничение по символам)
@@ -77,7 +76,7 @@ async def chat(user_id, user_input):
 
 
 @router.message()
-async def any_reply(message: Message, bot: Bot):
+async def any_reply(message: Message):
     user_id = message.from_user.id
     user_input = message.text
     logging.info(f"Response from {user_id} : {user_input}")
