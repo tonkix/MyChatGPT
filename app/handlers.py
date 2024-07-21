@@ -59,12 +59,14 @@ async def chat(user_id, user_input):
         response = await g4f.ChatCompletion.create_async(
             model=g4f.models.default,
             messages=chat_history,
-            # provider=g4f.Provider.Blackbox, # работает, но кривой
-            # provider=g4f.Provider.GeminiProChat, # работает, но кривой, чуть менее кривой (ограничение по символам)
-            # provider=g4f.Provider.PerplexityLabs, # пока лучше других
-            # provider=g4f.Provider.You, # работал, но сейчас не хочет
-            provider=g4f.Provider.PerplexityLabs,
-            api_key=os.getenv('openai_token_new')
+            # provider=g4f.Provider.Blackbox,  # работает, но кривой
+            # provider=g4f.Provider.GeminiProChat,  # работает, но кривой, чуть менее кривой (ограничение по символам)
+            # provider=g4f.Provider.PerplexityLabs,  # пока лучше других
+            # provider=g4f.Provider.You,  # работает 21/07/24
+            # provider=g4f.Provider.FreeGpt,  # работает 21/07/24
+            provider=g4f.Provider.You ,  #
+            # provider=g4f.Provider.PerplexityLabs,
+            api_key=os.getenv('OPENAI_TOKEN_NEW')
         )
         chat_gpt_response = response
         conversation_history[user_id].append({"role": "assistant", "content": chat_gpt_response})
